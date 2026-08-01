@@ -41,4 +41,30 @@ export async function serverFetch(path, query = {}, options = {}) {
   return response.json();
 }
 
+export async function serverMutation(
+  path,
+  method = "POST",
+  body = null,
+  options = {},
+) {
+  const url = `${BASE_URL}${path}`;
 
+  const response = await fetch(url, {
+    method: method.toUpperCase(),
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    ...options,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.error || `HTTP error! status: ${response.status}`,
+    );
+  }
+
+  return response.json();
+}
