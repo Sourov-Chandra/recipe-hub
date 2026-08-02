@@ -19,19 +19,19 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "user",
-        input: false, // Security: Client cannot set this during sign up
+        input: false, 
       },
       isBlocked: {
         type: "boolean",
         required: false,
         defaultValue: false,
-        input: false, // Security: Client cannot set this during sign up
+        input: false, 
       },
       isPremium: {
         type: "boolean",
         required: false,
         defaultValue: false,
-        input: false, // Security: Client cannot set this during sign up
+        input: false,
       },
     },
   },
