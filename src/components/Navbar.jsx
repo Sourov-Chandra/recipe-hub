@@ -245,9 +245,12 @@ export default function Navbar() {
               <div className="flex flex-col space-y-4">
                 <div className="flex items-center gap-3">
                   {session.user.image ? (
-                    <img
+                    <Image
                       src={session.user.image}
-                      alt={session.user.name}
+                      alt={session.user.name || "User avatar"}
+                      width={40}
+                      height={40}
+                      unoptimized
                       className="w-10 h-10 rounded-full object-cover border border-orange-500"
                     />
                   ) : (
