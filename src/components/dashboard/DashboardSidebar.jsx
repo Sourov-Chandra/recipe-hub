@@ -48,8 +48,8 @@ export function DashboardSidebar({
       icon: <FaHeart className="w-4.5 h-4.5" />,
     },
     {
-      name: "My Purchased Recipes",
-      path: "/dashboard/user/purchased-recipes",
+      name: "My Purchases",
+      path: "/dashboard/user/my-purchases", 
       icon: <FaCreditCard className="w-4.5 h-4.5" />,
     },
     {
@@ -68,18 +68,23 @@ export function DashboardSidebar({
     },
     {
       name: "Manage Users",
-      path: "/dashboard/admin/manage-users",
+      path: "/dashboard/admin/users", 
       icon: <FaUsers className="w-4.5 h-4.5" />,
     },
     {
       name: "Manage Recipes",
-      path: "/dashboard/admin/manage-recipes",
+      path: "/dashboard/admin/recipes", 
       icon: <FaUtensils className="w-4.5 h-4.5" />,
     },
     {
       name: "Reports",
       path: "/dashboard/admin/reports",
       icon: <FaFlag className="w-4.5 h-4.5" />,
+    },
+    {
+      name: "Transactions",
+      path: "/dashboard/admin/transactions", 
+      icon: <FaCreditCard className="w-4.5 h-4.5" />,
     },
   ];
 
