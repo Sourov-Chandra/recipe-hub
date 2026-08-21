@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
 import { getRecipes } from "@/lib/api/recipes";
+import { getFavorites } from "@/lib/api/favorites";
 import Link from "next/link";
 import Image from "next/image";
 import { 
@@ -18,21 +19,32 @@ import {
 export default function UserOverviewPage() {
   const { data: session } = useSession();
   const [recipes, setRecipes] = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
+      if (!session?.user?.email) return;
+
       try {
-        const data = await getRecipes();
-        setRecipes(data || []);
+        setLoading(true);
+
+        const [recipeData, favoriteData] = await Promise.all([
+          getRecipes({ email: session.user.email }),
+          getFavorites(session.user.email),
+        ]);
+
+        setRecipes(recipeData || []);
+        setFavorites(favoriteData || []);
       } catch (err) {
-        console.error("Failed to load dashboard stats:", err);
+        console.error("Failed to load dashboard statistics:", err);
       } finally {
         setLoading(false);
       }
     }
+
     loadData();
-  }, []);
+  }, [session?.user?.email]);
 
   if (loading) {
     return (
@@ -66,10 +78,11 @@ export default function UserOverviewPage() {
             )}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Manage your recipes, see statistics, and interact with the RecipeHub community.
+            Manage your recipes, see statistics, and interact with the RecipeHub
+            community.
           </p>
         </div>
-        
+
         {isLimitReached ? (
           <Link
             href="/plans"
@@ -93,7 +106,10 @@ export default function UserOverviewPage() {
             <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-700 dark:text-red-400 rounded-2xl flex items-start gap-3 text-sm">
               <FaTriangleExclamation className="w-5 h-5 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold">Recipe Limit Reached:</span> You have published 2/2 recipes. Free accounts are limited to a maximum of 2 published recipes. Please upgrade to Premium or delete an existing recipe to publish more.
+                <span className="font-bold">Recipe Limit Reached:</span> You
+                have published 2/2 recipes. Free accounts are limited to a
+                maximum of 2 published recipes. Please upgrade to Premium or
+                delete an existing recipe to publish more.
               </div>
             </div>
           )}
@@ -104,7 +120,8 @@ export default function UserOverviewPage() {
                 <FaCrown /> Upgrade to RecipeHub Premium
               </h3>
               <p className="text-sm opacity-90 max-w-xl">
-                Unlock unlimited recipe slots, post purchase-locked content, and receive support from the community.
+                Unlock unlimited recipe slots, post purchase-locked content, and
+                receive support from the community.
               </p>
             </div>
             <Link
@@ -121,13 +138,15 @@ export default function UserOverviewPage() {
         <div className="p-6 bg-white dark:bg-zinc-900 border border-gray-150 dark:border-zinc-800 rounded-3xl flex items-center justify-between shadow-sm">
           <div>
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-              My Recipes
+              Total Recipes
             </p>
             <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">
               {isPremium ? myRecipes.length : `${myRecipes.length} / 2`}
             </h3>
             <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 block">
-              {isPremium ? "Unlimited slots available" : `${2 - myRecipes.length} slot(s) remaining`}
+              {isPremium
+                ? "Unlimited slots available"
+                : `${2 - myRecipes.length} slot(s) remaining`}
             </span>
           </div>
           <div className="p-3.5 bg-orange-50/50 dark:bg-orange-950/10 border border-orange-100 dark:border-orange-950/30 text-orange-500 rounded-2xl">
@@ -158,7 +177,7 @@ export default function UserOverviewPage() {
               Favorites Added
             </p>
             <h3 className="text-3xl font-extrabold text-gray-900 dark:text-white mt-2">
-              0
+              {favorites.length}
             </h3>
             <span className="text-[10px] text-gray-450 mt-1 block">
               Recipes saved to your bookmarks
@@ -185,7 +204,8 @@ export default function UserOverviewPage() {
 
         {myRecipes.length === 0 ? (
           <div className="text-center py-12 text-gray-500 text-sm">
-            You haven&apos;t added any recipes yet. Click &quot;Add Recipe&quot; above to share your first!
+            You haven&apos;t added any recipes yet. Click &quot;Add Recipe&quot;
+            above to share your first!
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -209,7 +229,8 @@ export default function UserOverviewPage() {
                   </h4>
                   <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400 mt-1 items-center">
                     <span className="flex items-center gap-1">
-                      <FaClock className="text-orange-500 w-3 h-3" /> {recipe.preparationTime} mins
+                      <FaClock className="text-orange-500 w-3 h-3" />{" "}
+                      {recipe.preparationTime} mins
                     </span>
                     <span>•</span>
                     <span>{recipe.category}</span>
