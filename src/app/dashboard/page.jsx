@@ -15,7 +15,7 @@ export default function DashboardPage() {
       } else if (session.user?.role === "admin") {
         router.replace("/dashboard/admin");
       } else {
-        router.replace("/dashboard/user/my-recipes/add");
+        router.replace("/dashboard/user");
       }
     }
   }, [session, isPending, router]);

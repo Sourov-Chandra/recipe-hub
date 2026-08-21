@@ -49,6 +49,30 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Links */}
+        {/* <nav className="hidden md:flex items-center gap-8">
+          {navLinks.map((link) => {
+            const isActive =
+              link.path === "/"
+                ? pathname === "/"
+                : pathname.startsWith(link.path);
+            return (
+              <Link
+                key={link.path}
+                href={link.path}
+                className={`relative py-1 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "text-orange-500 font-semibold"
+                    : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                }`}
+              >
+                {link.name}
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-full" />
+                )}
+              </Link>
+            );
+          })}
+        </nav> */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
             const isActive =
@@ -72,6 +96,21 @@ export default function Navbar() {
               </Link>
             );
           })}
+          {session && (
+            <Link
+              href="/dashboard"
+              className={`relative py-1 text-sm font-medium transition-colors ${
+                pathname.startsWith("/dashboard")
+                  ? "text-orange-500 font-semibold"
+                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              }`}
+            >
+              Dashboard
+              {pathname.startsWith("/dashboard") && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-full" />
+              )}
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-4">
@@ -146,14 +185,14 @@ export default function Navbar() {
                         </p>
                       </div>
 
-                      <Link
+                      {/* <Link
                         href="/dashboard"
                         onClick={() => setIsProfileOpen(false)}
                         className="flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-gray-700 hover:text-orange-500 hover:bg-gray-50 dark:text-zinc-300 dark:hover:text-orange-400 dark:hover:bg-zinc-800/50 transition-colors"
                       >
                         <FaChartPie className="w-4 h-4 text-orange-500" />
                         <span>Dashboard</span>
-                      </Link>
+                      </Link> */}
 
                       <hr className="border-gray-100 dark:border-zinc-800/80 my-1.5" />
 
