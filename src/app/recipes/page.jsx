@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { getRecipes } from "@/lib/api/recipes";
 import Image from "next/image";
 import Link from "next/link";
-import { FaClock, FaUtensils, FaArrowRight } from "react-icons/fa6";
+import { FaClock, FaUtensils, FaArrowRight, FaHeart } from "react-icons/fa6"; 
 
 export default function SimpleBrowseRecipesPage() {
   const [recipes, setRecipes] = useState([]);
@@ -50,7 +50,6 @@ export default function SimpleBrowseRecipesPage() {
               key={recipe._id || recipe.id}
               className="group flex flex-col bg-white dark:bg-zinc-900 border border-gray-150 dark:border-zinc-800 rounded-3xl overflow-hidden hover:shadow-lg transition-all duration-300"
             >
-
               <div className="relative aspect-video w-full overflow-hidden bg-gray-100 dark:bg-zinc-800">
                 <Image
                   src={
@@ -83,10 +82,15 @@ export default function SimpleBrowseRecipesPage() {
                 </p>
 
                 <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 dark:border-zinc-800/80 text-sm text-gray-500 dark:text-zinc-400">
-                  <span className="flex items-center gap-1.5">
-                    <FaClock className="text-orange-500" />{" "}
-                    {recipe.preparationTime} mins
-                  </span>
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1.5">
+                      <FaClock className="text-orange-500" />{" "}
+                      {recipe.preparationTime} mins
+                    </span>
+                    <span className="flex items-center gap-1.5 text-red-500 font-semibold">
+                      <FaHeart /> {recipe.likesCount || 0}
+                    </span>
+                  </div>
                   <Link
                     href={`/recipes/${recipe._id}`}
                     className="text-orange-500 font-semibold flex items-center gap-1 hover:text-orange-600 transition-colors"
