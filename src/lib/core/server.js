@@ -1,4 +1,17 @@
+import { getUserToken } from "./session";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+
+export async function authHeader() {
+  const token = await getUserToken();
+  const header = token
+    ? {
+        Authorization: `Bearer ${token}`,
+      }
+    : {};
+  return header;
+}
 
 export async function serverFetch(path, query = {}, options = {}) {
   let url = `${BASE_URL}${path}`;
@@ -26,6 +39,7 @@ export async function serverFetch(path, query = {}, options = {}) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      ...(await authHeader()),
       ...options.headers,
     },
     ...options,
@@ -53,6 +67,7 @@ export async function serverMutation(
     method: method.toUpperCase(),
     headers: {
       "Content-Type": "application/json",
+      ...(await authHeader()),
       ...options.headers,
     },
     body: body ? JSON.stringify(body) : undefined,
@@ -68,3 +83,5 @@ export async function serverMutation(
 
   return response.json();
 }
+
+

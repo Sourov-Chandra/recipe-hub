@@ -14,6 +14,14 @@ export const getUserSession = async () => {
   return session?.user || null;
 };
 
+export const getUserToken = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  return session?.session?.token || null;
+};
+
 export const requireRole = async (role) => {
   const user = await getUserSession();
 
@@ -22,6 +30,10 @@ export const requireRole = async (role) => {
   }
 
   if (user.role !== role) {
+    redirect("/unauthorized");
+  }
+
+  if (user.isBlocked) {
     redirect("/unauthorized");
   }
 
