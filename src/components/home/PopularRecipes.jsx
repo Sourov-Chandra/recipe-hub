@@ -23,14 +23,14 @@ export default function PopularRecipes({ recipes = [] }) {
   return (
     <section className="bg-orange-50/50 py-20 dark:bg-zinc-950">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-10">
+        <div className="mb-10 flex flex-col items-center text-center">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-500">
             Trending now
           </p>
           <h2 className="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white">
             Most loved recipes
           </h2>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mx-auto mt-2 max-w-lg text-sm text-gray-500 dark:text-gray-400">
             Sorted by likes from the RecipeHub kitchen.
           </p>
         </div>
