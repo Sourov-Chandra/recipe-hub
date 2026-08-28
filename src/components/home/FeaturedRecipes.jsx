@@ -1,13 +1,29 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { FaArrowRight } from "react-icons/fa6";
 import HomeRecipeCard from "./HomeRecipeCard";
+
+const container = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.12 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 export default function FeaturedRecipes({ recipes = [] }) {
   const featured = recipes.filter((recipe) => recipe.isFeatured).slice(0, 3);
   const list = featured.length ? featured : recipes.slice(0, 3);
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20">
+    <section className="py-20">
+  <div className="mx-auto max-w-7xl px-6">
       <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-500">
@@ -34,16 +50,21 @@ export default function FeaturedRecipes({ recipes = [] }) {
           No recipes yet. Be the first chef to publish one.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.15 }}
+          className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+        >
           {list.map((recipe) => (
-            <HomeRecipeCard
-              key={recipe._id || recipe.id}
-              recipe={recipe}
-              featured
-            />
+            <motion.div key={recipe._id || recipe.id} variants={item}>
+              <HomeRecipeCard recipe={recipe} featured />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
+      </div>
     </section>
   );
 }

@@ -4,14 +4,15 @@ import { useTheme } from "@/context/themeContext";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { 
-  FaUtensils, 
-  FaMoon, 
-  FaSun, 
-  FaBars, 
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  FaUtensils,
+  FaMoon,
+  FaSun,
+  FaBars,
   FaXmark,
   FaChartPie,
-  FaRightFromBracket
+  FaRightFromBracket,
 } from "react-icons/fa6";
 import { useSession, signOut } from "@/lib/auth-client";
 import { TbSunHighFilled } from "react-icons/tb";
@@ -49,30 +50,6 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Links */}
-        {/* <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => {
-            const isActive =
-              link.path === "/"
-                ? pathname === "/"
-                : pathname.startsWith(link.path);
-            return (
-              <Link
-                key={link.path}
-                href={link.path}
-                className={`relative py-1 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "text-orange-500 font-semibold"
-                    : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                }`}
-              >
-                {link.name}
-                {isActive && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-full" />
-                )}
-              </Link>
-            );
-          })}
-        </nav> */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
             const isActive =
@@ -91,7 +68,10 @@ export default function Navbar() {
               >
                 {link.name}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-full" />
+                  <motion.span
+                    layoutId="navbar-underline"
+                    className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-full"
+                  />
                 )}
               </Link>
             );
@@ -107,7 +87,10 @@ export default function Navbar() {
             >
               Dashboard
               {pathname.startsWith("/dashboard") && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-full" />
+                <motion.span
+                  layoutId="navbar-underline"
+                  className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-full"
+                />
               )}
             </Link>
           )}
@@ -115,10 +98,11 @@ export default function Navbar() {
 
         <div className="flex items-center gap-4">
           {/* Dark Mode Icon Button*/}
-          <button
+          <motion.button
             onClick={toggleTheme}
             type="button"
             aria-label="Toggle Theme"
+            whileTap={{ scale: 0.9, rotate: 90 }}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
           >
             {theme === "dark" ? (
@@ -126,7 +110,7 @@ export default function Navbar() {
             ) : (
               <FaMoon className="w-4 h-4 text-gray-600" />
             )}
-          </button>
+          </motion.button>
 
           {/* Desktop Auth Links */}
           <div className="hidden md:flex items-center gap-5">
@@ -140,11 +124,6 @@ export default function Navbar() {
                   className="flex items-center gap-2.5 hover:opacity-90 transition-opacity focus:outline-none cursor-pointer"
                 >
                   {session.user.image ? (
-                    /*  <img
-                      src={session.user.image}
-                      alt={session.user.name}
-                      className="w-9 h-9 rounded-full object-cover border-2 border-orange-500/80 shadow-sm"
-                    /> */
                     <Image
                       src={session.user.image}
                       alt={session.user.name || "User avatar"}
@@ -166,54 +145,53 @@ export default function Navbar() {
                 </button>
 
                 {/* Profile Dropdown Menu */}
-                {isProfileOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setIsProfileOpen(false)}
-                    />
-                    <div className="absolute right-0 mt-3.5 w-56 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-xl py-2.5 z-20 animate-in fade-in slide-in-from-top-2 duration-150">
-                      <div className="px-4 py-2 border-b border-gray-100 dark:border-zinc-800/80 mb-2">
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500">
-                          Signed in as
-                        </p>
-                        <p className="text-sm font-bold text-gray-800 dark:text-zinc-150 truncate mt-0.5">
-                          {session.user.name}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-450 truncate">
-                          {session.user.email}
-                        </p>
-                      </div>
-
-                      {/* <Link
-                        href="/dashboard"
+                <AnimatePresence>
+                  {isProfileOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-gray-700 hover:text-orange-500 hover:bg-gray-50 dark:text-zinc-300 dark:hover:text-orange-400 dark:hover:bg-zinc-800/50 transition-colors"
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="absolute right-0 mt-3.5 w-56 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-xl py-2.5 z-20 origin-top-right"
                       >
-                        <FaChartPie className="w-4 h-4 text-orange-500" />
-                        <span>Dashboard</span>
-                      </Link> */}
+                        <div className="px-4 py-2 border-b border-gray-100 dark:border-zinc-800/80 mb-2">
+                          <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-500">
+                            Signed in as
+                          </p>
+                          <p className="text-sm font-bold text-gray-800 dark:text-zinc-150 truncate mt-0.5">
+                            {session.user.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-450 truncate">
+                            {session.user.email}
+                          </p>
+                        </div>
 
-                      <hr className="border-gray-100 dark:border-zinc-800/80 my-1.5" />
+                        <hr className="border-gray-100 dark:border-zinc-800/80 my-1.5" />
 
-                      <button
-                        onClick={async () => {
-                          setIsProfileOpen(false);
-                          try {
-                            await signOut();
-                            router.push("/login");
-                          } catch (error) {
-                            console.error("Sign out error", error);
-                          }
-                        }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 transition-colors text-left cursor-pointer"
-                      >
-                        <FaRightFromBracket className="w-4 h-4" />
-                        <span>Logout</span>
-                      </button>
-                    </div>
-                  </>
-                )}
+                        <button
+                          onClick={async () => {
+                            setIsProfileOpen(false);
+                            try {
+                              await signOut();
+                              router.push("/login");
+                            } catch (error) {
+                              console.error("Sign out error", error);
+                            }
+                          }}
+                          className="w-full flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 transition-colors text-left cursor-pointer"
+                        >
+                          <FaRightFromBracket className="w-4 h-4" />
+                          <span>Logout</span>
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <>
@@ -250,111 +228,121 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Dropdown Menu*/}
-      {isMenuOpen && (
-        <div className="md:hidden border-t border-gray-100 dark:border-zinc-900 bg-white dark:bg-zinc-950 px-6 py-4 space-y-4">
-          <nav className="flex flex-col space-y-3">
-            {navLinks.map((link) => {
-              const isActive =
-                link.path === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.path);
-              return (
-                <Link
-                  key={link.path}
-                  href={link.path}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`text-sm font-medium py-1 transition-colors ${
-                    isActive
-                      ? "text-orange-500 font-semibold"
-                      : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              );
-            })}
-          </nav>
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="md:hidden overflow-hidden border-t border-gray-100 dark:border-zinc-900 bg-white dark:bg-zinc-950"
+          >
+            <div className="px-6 py-4 space-y-4">
+              <nav className="flex flex-col space-y-3">
+                {navLinks.map((link) => {
+                  const isActive =
+                    link.path === "/"
+                      ? pathname === "/"
+                      : pathname.startsWith(link.path);
+                  return (
+                    <Link
+                      key={link.path}
+                      href={link.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`text-sm font-medium py-1 transition-colors ${
+                        isActive
+                          ? "text-orange-500 font-semibold"
+                          : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
+              </nav>
 
-          <hr className="border-gray-100 dark:border-zinc-900" />
+              <hr className="border-gray-100 dark:border-zinc-900" />
 
-          <div className="flex flex-col space-y-3 pt-2">
-            {isPending ? (
-              <div className="h-10 w-full bg-gray-100 dark:bg-zinc-800 animate-pulse rounded-2xl" />
-            ) : session ? (
-              <div className="flex flex-col space-y-4">
-                <div className="flex items-center gap-3">
-                  {session.user.image ? (
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || "User avatar"}
-                      width={40}
-                      height={40}
-                      unoptimized
-                      className="w-10 h-10 rounded-full object-cover border border-orange-500"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 flex items-center justify-center bg-orange-100 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 rounded-full text-sm font-bold border border-orange-500/20">
-                      {session.user.name
-                        ? session.user.name[0].toUpperCase()
-                        : "U"}
+              <div className="flex flex-col space-y-3 pt-2">
+                {isPending ? (
+                  <div className="h-10 w-full bg-gray-100 dark:bg-zinc-800 animate-pulse rounded-2xl" />
+                ) : session ? (
+                  <div className="flex flex-col space-y-4">
+                    <div className="flex items-center gap-3">
+                      {session.user.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || "User avatar"}
+                          width={40}
+                          height={40}
+                          unoptimized
+                          className="w-10 h-10 rounded-full object-cover border border-orange-500"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 flex items-center justify-center bg-orange-100 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 rounded-full text-sm font-bold border border-orange-500/20">
+                          {session.user.name
+                            ? session.user.name[0].toUpperCase()
+                            : "U"}
+                        </div>
+                      )}
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                          {session.user.name}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {session.user.email}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                      {session.user.name}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {session.user.email}
-                    </span>
+
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full flex items-center justify-center gap-2 bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/20 dark:hover:bg-orange-950/30 text-orange-600 dark:text-orange-400 text-sm font-semibold py-2.5 rounded-2xl text-center transition-colors cursor-pointer"
+                    >
+                      <FaChartPie className="w-4 h-4" />
+                      <span>Dashboard</span>
+                    </Link>
+
+                    <button
+                      onClick={async () => {
+                        try {
+                          await signOut();
+                          setIsMenuOpen(false);
+                          router.push("/login");
+                        } catch (error) {
+                          console.error("Sign out error", error);
+                        }
+                      }}
+                      className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 text-sm font-semibold py-2.5 rounded-2xl text-center transition-colors cursor-pointer"
+                    >
+                      <FaRightFromBracket className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
                   </div>
-                </div>
-
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/20 dark:hover:bg-orange-950/30 text-orange-600 dark:text-orange-400 text-sm font-semibold py-2.5 rounded-2xl text-center transition-colors cursor-pointer"
-                >
-                  <FaChartPie className="w-4 h-4" />
-                  <span>Dashboard</span>
-                </Link>
-
-                <button
-                  onClick={async () => {
-                    try {
-                      await signOut();
-                      setIsMenuOpen(false);
-                      router.push("/login");
-                    } catch (error) {
-                      console.error("Sign out error", error);
-                    }
-                  }}
-                  className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 text-sm font-semibold py-2.5 rounded-2xl text-center transition-colors cursor-pointer"
-                >
-                  <FaRightFromBracket className="w-4 h-4" />
-                  <span>Logout</span>
-                </button>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="text-gray-800 hover:text-black dark:text-zinc-300 dark:hover:text-white text-sm font-medium transition-colors"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-6 py-2.5 rounded-2xl text-center transition-colors shadow-sm"
+                    >
+                      Register
+                    </Link>
+                  </>
+                )}
               </div>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-gray-800 hover:text-black dark:text-zinc-300 dark:hover:text-white text-sm font-medium transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-6 py-2.5 rounded-2xl text-center transition-colors shadow-sm"
-                >
-                  Register
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

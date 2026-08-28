@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   FaUtensils,
   FaFacebookF,
@@ -7,9 +10,22 @@ import {
   FaGithub,
 } from "react-icons/fa6";
 
+const socials = [
+  { href: "https://facebook.com", icon: FaFacebookF, label: "Facebook" },
+  { href: "https://instagram.com", icon: FaInstagram, label: "Instagram" },
+  { href: "https://youtube.com", icon: FaYoutube, label: "YouTube" },
+  { href: "https://github.com", icon: FaGithub, label: "GitHub" },
+];
+
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-100 bg-white dark:border-zinc-900 dark:bg-zinc-950">
+    <motion.footer
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="border-t border-gray-100 bg-white dark:border-zinc-900 dark:bg-zinc-950"
+    >
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-4">
         <div className="md:col-span-2">
           <Link
@@ -66,45 +82,20 @@ export default function Footer() {
           </p>
 
           <div className="mt-4 flex items-center gap-3">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-orange-500 hover:text-white dark:bg-zinc-900 dark:text-gray-300"
-            >
-              <FaFacebookF />
-            </a>
-
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-orange-500 hover:text-white dark:bg-zinc-900 dark:text-gray-300"
-            >
-              <FaInstagram />
-            </a>
-
-            <a
-              href="https://youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="YouTube"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-orange-500 hover:text-white dark:bg-zinc-900 dark:text-gray-300"
-            >
-              <FaYoutube />
-            </a>
-
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-orange-500 hover:text-white dark:bg-zinc-900 dark:text-gray-300"
-            >
-              <FaGithub />
-            </a>
+            {socials.map(({ href, icon: Icon, label }) => (
+              <motion.a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                whileHover={{ scale: 1.15, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-orange-500 hover:text-white dark:bg-zinc-900 dark:text-gray-300"
+              >
+                <Icon />
+              </motion.a>
+            ))}
           </div>
         </div>
       </div>
@@ -112,6 +103,6 @@ export default function Footer() {
       <div className="border-t border-gray-100 px-6 py-5 text-center text-xs text-gray-400 dark:border-zinc-900">
         © {new Date().getFullYear()} RecipeHub. Cook generously.
       </div>
-    </footer>
+    </motion.footer>
   );
 }

@@ -1,4 +1,19 @@
+"use client";
+
+import { motion } from "framer-motion";
 import HomeRecipeCard from "./HomeRecipeCard";
+
+const container = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 export default function PopularRecipes({ recipes = [] }) {
   const popular = [...recipes]
@@ -25,11 +40,19 @@ export default function PopularRecipes({ recipes = [] }) {
             Popular recipes will appear here after the first likes come in.
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <motion.div
+            variants={container}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.15 }}
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+          >
             {popular.map((recipe) => (
-              <HomeRecipeCard key={recipe._id || recipe.id} recipe={recipe} />
+              <motion.div key={recipe._id || recipe.id} variants={item}>
+                <HomeRecipeCard recipe={recipe} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </section>
