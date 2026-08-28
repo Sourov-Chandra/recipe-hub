@@ -17,7 +17,6 @@ import {
   FaTriangleExclamation,
 } from "react-icons/fa6";
 
-// Animation Variants
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {

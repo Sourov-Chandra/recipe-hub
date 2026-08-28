@@ -31,7 +31,7 @@ export default function BrowseRecipesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecipes, setTotalRecipes] = useState(0);
-  const limit = 6; // 6 recipes per page
+  const limit = 6;
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -43,7 +43,6 @@ export default function BrowseRecipesPage() {
           category: selectedCategories,
         });
 
-        // Backend returns paginated object { recipes, total, page, totalPages } when page/limit is provided
         setRecipes(data.recipes || []);
         setTotalPages(data.totalPages || 1);
         setTotalRecipes(data.total || 0);
@@ -63,7 +62,7 @@ export default function BrowseRecipesPage() {
         : [...prev, category];
       return next;
     });
-    setPage(1); // Reset to page 1 on filter changes
+    setPage(1);
   };
 
   const handleClearFilters = () => {
