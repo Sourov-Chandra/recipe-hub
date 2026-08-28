@@ -23,6 +23,8 @@ import {
 } from "react-icons/fa6";
 import { getPurchases } from "@/lib/api/purchases";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 export default function RecipeDetailsPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
   const recipeId = params.id;
@@ -48,7 +50,7 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
   async function verifyRecipePayment(sId) {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/payments/verify-session",
+        `${API_BASE_URL}/api/payments/verify-session`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -105,7 +107,7 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
     setPurchasing(true);
     try {
       const res = await fetch(
-        "http://localhost:5000/api/payments/create-recipe-checkout-session",
+        `${API_BASE_URL}/api/payments/create-recipe-checkout-session`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -137,16 +139,13 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
     const action = liked ? "unlike" : "like";
 
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/recipes/${recipeId}/like`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ action }),
+      const res = await fetch(`${API_BASE_URL}/api/recipes/${recipeId}/like`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ action }),
+      });
 
       if (res.ok) {
         setLikesCount((prev) => Math.max(0, prev + (liked ? -1 : 1)));
@@ -164,7 +163,7 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/favorites/toggle", {
+      const res = await fetch(`${API_BASE_URL}/api/favorites/toggle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -195,7 +194,7 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
     e.preventDefault();
     setReporting(true);
     try {
-      const res = await fetch("http://localhost:5000/api/reports", {
+      const res = await fetch(`${API_BASE_URL}/api/reports`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -255,6 +254,7 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
     purchased ||
     (session?.user?.email && recipe?.authorEmail === session.user.email) ||
     session?.user?.role === "admin";
+
   return (
     <motion.div
       className="max-w-4xl mx-auto my-12 px-6 space-y-8"
