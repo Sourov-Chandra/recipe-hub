@@ -12,8 +12,22 @@ import {
   FaTriangleExclamation,
   FaUtensils,
 } from "react-icons/fa6";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "@/lib/auth-client";
 import { getPurchases } from "@/lib/api/purchases";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
+};
 
 export default function MyPurchasesPage() {
   const { data: session } = useSession();
@@ -55,7 +69,12 @@ export default function MyPurchasesPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="space-y-8"
+    >
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -66,21 +85,39 @@ export default function MyPurchasesPage() {
           </p>
         </div>
 
-        <div className="inline-flex w-fit items-center gap-2 rounded-2xl border border-orange-100 bg-orange-50 px-4 py-2 text-sm font-bold text-orange-600 dark:border-orange-950/30 dark:bg-orange-950/20 dark:text-orange-400">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.25, delay: 0.1 }}
+          className="inline-flex w-fit items-center gap-2 rounded-2xl border border-orange-100 bg-orange-50 px-4 py-2 text-sm font-bold text-orange-600 dark:border-orange-950/30 dark:bg-orange-950/20 dark:text-orange-400"
+        >
           <FaBagShopping />
           {purchases.length} Purchased
-        </div>
+        </motion.div>
       </div>
 
-      {error && (
-        <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
-          <FaTriangleExclamation className="mt-0.5 shrink-0" />
-          <p>{error}</p>
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 overflow-hidden"
+          >
+            <FaTriangleExclamation className="mt-0.5 shrink-0" />
+            <p>{error}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {purchases.length === 0 ? (
-        <div className="rounded-3xl border border-gray-100 bg-white px-6 py-16 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="rounded-3xl border border-gray-100 bg-white px-6 py-16 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+        >
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-50 text-orange-500 dark:bg-orange-950/20">
             <FaBagShopping className="h-7 w-7" />
           </div>
@@ -101,16 +138,24 @@ export default function MyPurchasesPage() {
             <FaUtensils />
             Browse Recipes
           </Link>
-        </div>
+        </motion.div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <motion.div
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3"
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
           {purchases.map((recipe) => {
             const recipeId = recipe._id || recipe.id;
 
             return (
-              <article
+              <motion.article
                 key={recipe.paymentId || recipeId}
-                className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+                variants={cardVariants}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div className="relative h-48 bg-gray-100 dark:bg-zinc-800">
                   <Image
@@ -167,11 +212,11 @@ export default function MyPurchasesPage() {
                     View Recipe Details
                   </Link>
                 </div>
-              </article>
+              </motion.article>
             );
           })}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   FaEye,
   FaStar,
@@ -96,13 +97,22 @@ export default function AdminRecipesPage() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-9 w-9 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+        <motion.div
+          className="h-9 w-9 rounded-full border-2 border-orange-500 border-t-transparent"
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      className="space-y-8"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
       <div>
         <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
           <FaUtensils className="text-orange-500" />
@@ -113,12 +123,19 @@ export default function AdminRecipesPage() {
         </p>
       </div>
 
-      {error && (
-        <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
-          <FaTriangleExclamation className="mt-0.5 shrink-0" />
-          <p>{error}</p>
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-start gap-3 overflow-hidden rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400"
+          >
+            <FaTriangleExclamation className="mt-0.5 shrink-0" />
+            <p>{error}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <div className="overflow-x-auto">
@@ -133,94 +150,111 @@ export default function AdminRecipesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
-              {recipes.map((recipe) => {
-                const id = recipe._id;
-                const busy = workingId === id;
+              <AnimatePresence initial={false}>
+                {recipes.map((recipe, index) => {
+                  const id = recipe._id;
+                  const busy = workingId === id;
 
-                return (
-                  <tr key={id}>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-gray-100 dark:bg-zinc-800">
-                          <Image
-                            src={recipe.recipeImage}
-                            alt={recipe.recipeName}
-                            fill
-                            unoptimized
-                            className="object-cover"
-                          />
+                  return (
+                    <motion.tr
+                      key={id}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25, delay: index * 0.03 }}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-gray-100 dark:bg-zinc-800">
+                            <Image
+                              src={recipe.recipeImage}
+                              alt={recipe.recipeName}
+                              fill
+                              unoptimized
+                              className="object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              {recipe.recipeName}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {recipe.category} · {recipe.cuisineType}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-900 dark:text-white">
-                            {recipe.recipeName}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {recipe.category} · {recipe.cuisineType}
-                          </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm text-gray-800 dark:text-zinc-200">
+                          {recipe.authorName}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {recipe.authorEmail}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={recipe.status || "approved"}
+                          disabled={busy}
+                          onChange={(e) => handleStatus(recipe, e.target.value)}
+                          className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold dark:border-zinc-700 dark:bg-zinc-800"
+                        >
+                          <option value="approved">Approved</option>
+                          <option value="pending">Pending</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4">
+                        <motion.span
+                          key={recipe.isFeatured ? "featured" : "normal"}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                          className={`inline-block rounded-lg px-2.5 py-1 text-xs font-bold ${
+                            recipe.isFeatured
+                              ? "bg-amber-50 text-amber-600"
+                              : "bg-gray-100 text-gray-500 dark:bg-zinc-800"
+                          }`}
+                        >
+                          {recipe.isFeatured ? "Featured" : "Normal"}
+                        </motion.span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <Link
+                            href={`/recipes/${id}`}
+                            className="rounded-xl border border-gray-100 p-2 text-gray-400 hover:text-orange-500 dark:border-zinc-800"
+                          >
+                            <FaEye />
+                          </Link>
+                          <motion.button
+                            type="button"
+                            disabled={busy}
+                            whileTap={{ scale: 0.9 }}
+                            whileHover={{ scale: 1.05 }}
+                            onClick={() => handleFeature(recipe)}
+                            className="rounded-xl border border-gray-100 p-2 text-gray-400 hover:text-amber-500 disabled:opacity-50 dark:border-zinc-800"
+                            title="Toggle featured"
+                          >
+                            <FaStar />
+                          </motion.button>
+                          <motion.button
+                            type="button"
+                            disabled={busy}
+                            whileTap={{ scale: 0.9 }}
+                            whileHover={{ scale: 1.05 }}
+                            onClick={() => setDeleteTarget(recipe)}
+                            className="rounded-xl border border-gray-100 p-2 text-gray-400 hover:text-red-500 disabled:opacity-50 dark:border-zinc-800"
+                          >
+                            <FaTrash />
+                          </motion.button>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-800 dark:text-zinc-200">
-                        {recipe.authorName}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {recipe.authorEmail}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={recipe.status || "approved"}
-                        disabled={busy}
-                        onChange={(e) => handleStatus(recipe, e.target.value)}
-                        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold dark:border-zinc-700 dark:bg-zinc-800"
-                      >
-                        <option value="approved">Approved</option>
-                        <option value="pending">Pending</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                          recipe.isFeatured
-                            ? "bg-amber-50 text-amber-600"
-                            : "bg-gray-100 text-gray-500 dark:bg-zinc-800"
-                        }`}
-                      >
-                        {recipe.isFeatured ? "Featured" : "Normal"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <Link
-                          href={`/recipes/${id}`}
-                          className="rounded-xl border border-gray-100 p-2 text-gray-400 hover:text-orange-500 dark:border-zinc-800"
-                        >
-                          <FaEye />
-                        </Link>
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => handleFeature(recipe)}
-                          className="rounded-xl border border-gray-100 p-2 text-gray-400 hover:text-amber-500 disabled:opacity-50 dark:border-zinc-800"
-                          title="Toggle featured"
-                        >
-                          <FaStar />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => setDeleteTarget(recipe)}
-                          className="rounded-xl border border-gray-100 p-2 text-gray-400 hover:text-red-500 disabled:opacity-50 dark:border-zinc-800"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </AnimatePresence>
 
               {recipes.length === 0 && (
                 <tr>
@@ -237,37 +271,50 @@ export default function AdminRecipesPage() {
         </div>
       </div>
 
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md space-y-4 rounded-3xl bg-white p-6 dark:bg-zinc-900">
-            <div className="flex items-start justify-between">
-              <h3 className="text-lg font-bold">Delete Recipe</h3>
-              <button type="button" onClick={() => setDeleteTarget(null)}>
-                <FaXmark />
-              </button>
-            </div>
-            <p className="text-sm text-gray-500">
-              Delete &quot;{deleteTarget.recipeName}&quot; permanently?
-            </p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setDeleteTarget(null)}
-                className="flex-1 rounded-2xl border py-3 text-sm font-semibold"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmDelete}
-                className="flex-1 rounded-2xl bg-red-500 py-3 text-sm font-semibold text-white"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="w-full max-w-md space-y-4 rounded-3xl bg-white p-6 dark:bg-zinc-900"
+            >
+              <div className="flex items-start justify-between">
+                <h3 className="text-lg font-bold">Delete Recipe</h3>
+                <button type="button" onClick={() => setDeleteTarget(null)}>
+                  <FaXmark />
+                </button>
+              </div>
+              <p className="text-sm text-gray-500">
+                Delete &quot;{deleteTarget.recipeName}&quot; permanently?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(null)}
+                  className="flex-1 rounded-2xl border py-3 text-sm font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  className="flex-1 rounded-2xl bg-red-500 py-3 text-sm font-semibold text-white"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

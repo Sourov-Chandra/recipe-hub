@@ -11,6 +11,7 @@ import {
   FaTriangleExclamation,
   FaUser,
 } from "react-icons/fa6";
+import { motion, AnimatePresence } from "framer-motion";
 import { authClient, useSession } from "@/lib/auth-client";
 
 export default function ProfilePage() {
@@ -22,13 +23,13 @@ export default function ProfilePage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
- useEffect(() => {
-   if (!session?.user) return;
+  useEffect(() => {
+    if (!session?.user) return;
 
-   // eslint-disable-next-line react-hooks/set-state-in-effect
-   setName(session.user.name || "");
-   setImage(session.user.image || "");
- }, [session]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setName(session.user.name || "");
+    setImage(session.user.image || "");
+  }, [session]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -66,7 +67,12 @@ export default function ProfilePage() {
   const isPremium = session?.user?.isPremium;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 animate-in fade-in duration-300">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="mx-auto max-w-3xl space-y-8"
+    >
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Profile Settings
@@ -76,13 +82,23 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.05 }}
+        className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      >
         <div className="h-28 bg-linear-to-r from-orange-500 to-amber-400" />
 
         <div className="relative px-6 pb-6 sm:px-8">
           <div className="-mt-14 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex items-end gap-4">
-              <div className="relative h-28 w-28 overflow-hidden rounded-3xl border-4 border-white bg-orange-100 shadow-md dark:border-zinc-900 dark:bg-orange-950/30">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.15 }}
+                className="relative h-28 w-28 overflow-hidden rounded-3xl border-4 border-white bg-orange-100 shadow-md dark:border-zinc-900 dark:bg-orange-950/30"
+              >
                 {image ? (
                   <Image
                     src={image}
@@ -96,7 +112,7 @@ export default function ProfilePage() {
                     {name ? name[0].toUpperCase() : <FaUser />}
                   </div>
                 )}
-              </div>
+              </motion.div>
 
               <div className="pb-1">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -111,17 +127,25 @@ export default function ProfilePage() {
             </div>
 
             {isPremium && (
-              <span className="flex w-fit items-center gap-2 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm">
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.25, delay: 0.2 }}
+                className="flex w-fit items-center gap-2 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm"
+              >
                 <FaCrown />
                 Premium Member
-              </span>
+              </motion.span>
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <form
+      <motion.form
         onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
         className="space-y-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8"
       >
         <div>
@@ -133,19 +157,35 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        {error && (
-          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
-            <FaTriangleExclamation className="mt-0.5 shrink-0" />
-            <p>{error}</p>
-          </div>
-        )}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, y: -8, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400 overflow-hidden"
+            >
+              <FaTriangleExclamation className="mt-0.5 shrink-0" />
+              <p>{error}</p>
+            </motion.div>
+          )}
 
-        {message && (
-          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-950/20 dark:text-emerald-400">
-            <FaCheck />
-            <p>{message}</p>
-          </div>
-        )}
+          {message && (
+            <motion.div
+              key="message"
+              initial={{ opacity: 0, y: -8, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-950/20 dark:text-emerald-400 overflow-hidden"
+            >
+              <FaCheck />
+              <p>{message}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <label className="space-y-2">
@@ -203,7 +243,9 @@ export default function ProfilePage() {
         </label>
 
         <div className="flex justify-end border-t border-gray-100 pt-6 dark:border-zinc-800">
-          <button
+          <motion.button
+            whileHover={{ scale: saving ? 1 : 1.02 }}
+            whileTap={{ scale: saving ? 1 : 0.97 }}
             type="submit"
             disabled={saving}
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
@@ -214,9 +256,9 @@ export default function ProfilePage() {
               <FaPen />
             )}
             {saving ? "Saving Changes..." : "Save Changes"}
-          </button>
+          </motion.button>
         </div>
-      </form>
-    </div>
+      </motion.form>
+    </motion.div>
   );
 }

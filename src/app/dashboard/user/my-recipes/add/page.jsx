@@ -4,6 +4,20 @@ import React, { useState } from "react";
 import { addRecipe } from "@/lib/api/recipes";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import { motion, AnimatePresence } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+  },
+};
+
+const fieldVariants = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
+};
 
 export default function AddRecipePage() {
   const { data: session } = useSession();
@@ -28,8 +42,7 @@ export default function AddRecipePage() {
   };
 
   const uploadImageToImgBB = async (file) => {
-    const apiKey =
-      process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
     const imgData = new FormData();
     imgData.append("image", file);
 
@@ -92,24 +105,51 @@ export default function AddRecipePage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto my-12 p-8 bg-white dark:bg-zinc-900 border border-gray-150 dark:border-zinc-800 rounded-3xl">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="max-w-2xl mx-auto my-12 p-8 bg-white dark:bg-zinc-900 border border-gray-150 dark:border-zinc-800 rounded-3xl"
+    >
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
         Add New Recipe
       </h2>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-2xl text-sm">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="mb-4 p-4 bg-green-50 text-green-600 rounded-2xl text-sm">
-          {success}
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {error && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: -8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mb-4 p-4 bg-red-50 text-red-600 rounded-2xl text-sm overflow-hidden"
+          >
+            {error}
+          </motion.div>
+        )}
+        {success && (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, y: -8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mb-4 p-4 bg-green-50 text-green-600 rounded-2xl text-sm overflow-hidden"
+          >
+            {success}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+      <motion.form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div variants={fieldVariants}>
           <label className="block text-sm font-semibold mb-1">
             Recipe Name
           </label>
@@ -121,9 +161,9 @@ export default function AddRecipePage() {
             required
             className="w-full p-3 bg-gray-50 border rounded-2xl dark:bg-zinc-800 dark:border-zinc-700"
           />
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div variants={fieldVariants}>
           <label className="block text-sm font-semibold mb-1">
             Recipe Image
           </label>
@@ -134,9 +174,9 @@ export default function AddRecipePage() {
             required
             className="w-full p-3 bg-gray-50 border rounded-2xl dark:bg-zinc-800 dark:border-zinc-700"
           />
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <motion.div variants={fieldVariants} className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold mb-1">Category</label>
             <select
@@ -168,9 +208,9 @@ export default function AddRecipePage() {
               className="w-full p-3 bg-gray-50 border rounded-2xl dark:bg-zinc-800 dark:border-zinc-700"
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <motion.div variants={fieldVariants} className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold mb-1">
               Difficulty Level
@@ -200,9 +240,9 @@ export default function AddRecipePage() {
               className="w-full p-3 bg-gray-50 border rounded-2xl dark:bg-zinc-800 dark:border-zinc-700"
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div variants={fieldVariants}>
           <label className="block text-sm font-semibold mb-1">
             Ingredients (comma separated)
           </label>
@@ -214,9 +254,9 @@ export default function AddRecipePage() {
             required
             className="w-full p-3 bg-gray-50 border rounded-2xl h-24 dark:bg-zinc-800 dark:border-zinc-700"
           />
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div variants={fieldVariants}>
           <label className="block text-sm font-semibold mb-1">
             Instructions
           </label>
@@ -227,16 +267,19 @@ export default function AddRecipePage() {
             required
             className="w-full p-3 bg-gray-50 border rounded-2xl h-32 dark:bg-zinc-800 dark:border-zinc-700"
           />
-        </div>
+        </motion.div>
 
-        <button
+        <motion.button
+          variants={fieldVariants}
+          whileHover={{ scale: loading ? 1 : 1.01 }}
+          whileTap={{ scale: loading ? 1 : 0.98 }}
           type="submit"
           disabled={loading}
           className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-2xl transition-all disabled:opacity-50"
         >
           {loading ? "Adding Recipe..." : "Add Recipe"}
-        </button>
-      </form>
-    </div>
+        </motion.button>
+      </motion.form>
+    </motion.div>
   );
 }
