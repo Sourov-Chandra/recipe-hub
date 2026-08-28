@@ -6,6 +6,7 @@ import { useSession } from "@/lib/auth-client";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   FaClock,
   FaUtensils,
@@ -20,6 +21,7 @@ import {
   FaCircleCheck,
   FaXmark,
 } from "react-icons/fa6";
+import { getPurchases } from "@/lib/api/purchases";
 
 export default function RecipeDetailsPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
@@ -69,8 +71,18 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
         setRecipe(data);
         setLikesCount(data.likesCount || 0);
 
-        if (purchaseSuccess && sessionId && session?.user?.email) {
-          await verifyRecipePayment(sessionId);
+        if (session?.user?.email) {
+          if (purchaseSuccess && sessionId) {
+            await verifyRecipePayment(sessionId);
+          } else {
+            const purchaseData = await getPurchases(session.user.email);
+            const hasPurchased = purchaseData.some(
+              (p) => (p._id || p.id) === recipeId,
+            );
+            if (hasPurchased) {
+              setPurchased(true);
+            }
+          }
         }
       } catch (err) {
         console.error("Failed to load recipe:", err);
@@ -84,24 +96,6 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
       loadRecipe();
     }
   }, [recipeId, purchaseSuccess, sessionId, session?.user?.email]);
-
-  async function verifyRecipePayment(sId) {
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/payments/verify-session",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId: sId }),
-        },
-      );
-      if (response.ok) {
-        setPurchased(true);
-      }
-    } catch (err) {
-      console.error("Verification failed:", err);
-    }
-  }
 
   const handlePurchase = async () => {
     if (!session?.user) {
@@ -224,7 +218,11 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500 mb-4"></div>
+        <motion.div
+          className="rounded-full h-10 w-10 border-b-2 border-orange-500 mb-4"
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+        />
         <span className="text-sm text-gray-500">Loading recipe details...</span>
       </div>
     );
@@ -253,8 +251,17 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
       ? recipe.ingredients.split(",").map((i) => i.trim())
       : [];
 
+  const isUnlocked =
+    purchased ||
+    (session?.user?.email && recipe?.authorEmail === session.user.email) ||
+    session?.user?.role === "admin";
   return (
-    <div className="max-w-4xl mx-auto my-12 px-6 space-y-8 animate-in fade-in duration-300">
+    <motion.div
+      className="max-w-4xl mx-auto my-12 px-6 space-y-8"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
       <Link
         href="/recipes"
         className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-orange-500 transition-colors"
@@ -263,7 +270,12 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
       </Link>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-gray-55 border border-gray-150 shadow-md">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="relative aspect-square w-full rounded-3xl overflow-hidden bg-gray-55 border border-gray-150 shadow-md"
+        >
           <Image
             src={recipe.recipeImage}
             alt={recipe.recipeName}
@@ -271,7 +283,7 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
             className="object-cover"
             unoptimized
           />
-        </div>
+        </motion.div>
 
         <div className="space-y-6">
           <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">
@@ -327,21 +339,35 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
 
           <div className="space-y-4">
             <div className="flex gap-3">
-              <button
+              <motion.button
+                whileTap={{ scale: 0.96 }}
                 onClick={handleLike}
-                className={`flex-1 py-3 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border transition-all active:scale-98 cursor-pointer ${
+                className={`flex-1 py-3 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border transition-colors cursor-pointer ${
                   liked
                     ? "bg-red-500 text-white border-red-500"
                     : "bg-white hover:bg-red-50/50 text-gray-700 dark:bg-zinc-900 dark:text-zinc-300 border-gray-200 dark:border-zinc-800"
                 }`}
               >
-                <FaHeart />
-                <span>{likesCount} Likes</span>
-              </button>
+                <motion.span
+                  animate={liked ? { scale: [1, 1.3, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <FaHeart />
+                </motion.span>
+                <motion.span
+                  key={likesCount}
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  {likesCount} Likes
+                </motion.span>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={handleFavorite}
-                className={`px-5 py-3 rounded-2xl border transition-all active:scale-98 cursor-pointer ${
+                className={`px-5 py-3 rounded-2xl border transition-colors cursor-pointer ${
                   favorited
                     ? "bg-blue-500 text-white border-blue-500"
                     : "border-gray-200 dark:border-zinc-800 hover:bg-orange-50 text-gray-500"
@@ -349,15 +375,16 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
                 title="Favorite"
               >
                 <FaBookmark />
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setIsReportOpen(true)}
-                className="px-5 py-3 rounded-2xl border border-gray-200 dark:border-zinc-800 hover:bg-red-50 text-gray-500 hover:text-red-500 transition-all cursor-pointer"
+                className="px-5 py-3 rounded-2xl border border-gray-200 dark:border-zinc-800 hover:bg-red-50 text-gray-500 hover:text-red-500 transition-colors cursor-pointer"
                 title="Report Abuse"
               >
                 <FaFlag />
-              </button>
+              </motion.button>
             </div>
 
             <div className="p-5 bg-linear-to-tr from-amber-500/10 to-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-between gap-4">
@@ -372,25 +399,27 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
                 </p>
               </div>
 
-              {purchased ? (
-                <span className="bg-green-500 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1">
-                  <FaCircleCheck /> Unlocked
-                </span>
-              ) : (
-                <button
-                  onClick={handlePurchase}
-                  disabled={purchasing}
-                  className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {purchasing ? (
-                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  ) : (
-                    <>
-                      <FaLock className="w-3 h-3" /> Buy $1.99
-                    </>
-                  )}
-                </button>
-              )}
+              <AnimatePresence mode="wait">
+                {isUnlocked ? (
+                  <span className="bg-green-500 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1">
+                    <FaCircleCheck /> Unlocked
+                  </span>
+                ) : (
+                  <button
+                    onClick={handlePurchase}
+                    disabled={purchasing}
+                    className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {purchasing ? (
+                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      <>
+                        <FaLock className="w-3 h-3" /> Buy $1.99
+                      </>
+                    )}
+                  </button>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -427,58 +456,71 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
         </div>
       </div>
 
-      {isReportOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-zinc-900 border border-gray-150 dark:border-zinc-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-start">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Report Recipe
-              </h3>
-              <button
-                onClick={() => setIsReportOpen(false)}
-                type="button"
-                className="p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-50 dark:bg-zinc-800 rounded-xl border border-gray-100"
-              >
-                <FaXmark className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleReportSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                  Reason for Report
-                </label>
-                <select
-                  value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value)}
-                  className="w-full p-3 bg-gray-50 dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl text-sm"
-                >
-                  <option value="Spam">Spam</option>
-                  <option value="Offensive Content">Offensive Content</option>
-                  <option value="Copyright Issue">Copyright Issue</option>
-                </select>
-              </div>
-
-              <div className="flex items-center gap-3 pt-2">
+      <AnimatePresence>
+        {isReportOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="bg-white dark:bg-zinc-900 border border-gray-150 dark:border-zinc-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl p-6 space-y-4"
+            >
+              <div className="flex justify-between items-start">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  Report Recipe
+                </h3>
                 <button
                   onClick={() => setIsReportOpen(false)}
                   type="button"
-                  className="flex-1 py-3 text-xs font-semibold text-gray-700 dark:text-zinc-300 border rounded-2xl hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
+                  className="p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-50 dark:bg-zinc-800 rounded-xl border border-gray-100"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={reporting}
-                  className="flex-1 py-3 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-                >
-                  {reporting ? "Submitting..." : "Submit Report"}
+                  <FaXmark className="w-4 h-4" />
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+
+              <form onSubmit={handleReportSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    Reason for Report
+                  </label>
+                  <select
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    className="w-full p-3 bg-gray-50 dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl text-sm"
+                  >
+                    <option value="Spam">Spam</option>
+                    <option value="Offensive Content">Offensive Content</option>
+                    <option value="Copyright Issue">Copyright Issue</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    onClick={() => setIsReportOpen(false)}
+                    type="button"
+                    className="flex-1 py-3 text-xs font-semibold text-gray-700 dark:text-zinc-300 border rounded-2xl hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={reporting}
+                    className="flex-1 py-3 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-2xl shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {reporting ? "Submitting..." : "Submit Report"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
