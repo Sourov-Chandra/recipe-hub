@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import { FaCrown, FaCheck, FaArrowRight } from "react-icons/fa6";
 import Link from "next/link";
+import { getUserToken } from "@/lib/core/session";
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function PlansPage() {
   const { data: session } = useSession();
@@ -20,12 +23,14 @@ export default function PlansPage() {
     setError("");
 
     try {
+      const token = await getUserToken();
       const response = await fetch(
-        "http://localhost:5000/api/payments/create-checkout-session",
+        `${BASE_URL}/payments/create-checkout-session`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             email: session.user.email,

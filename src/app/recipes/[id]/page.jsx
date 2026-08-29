@@ -22,8 +22,11 @@ import {
   FaXmark,
 } from "react-icons/fa6";
 import { getPurchases } from "@/lib/api/purchases";
+import { getUserToken } from "@/lib/core/session";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
+  ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, "")
+  : "http://localhost:5000";
 
 export default function RecipeDetailsPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
@@ -49,11 +52,15 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
 
   async function verifyRecipePayment(sId) {
     try {
+      const token = await getUserToken();
       const response = await fetch(
         `${API_BASE_URL}/api/payments/verify-session`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({ sessionId: sId }),
         },
       );
@@ -106,11 +113,15 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
     }
     setPurchasing(true);
     try {
+      const token = await getUserToken();
       const res = await fetch(
         `${API_BASE_URL}/api/payments/create-recipe-checkout-session`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({
             email: session.user.email,
             userId: session.user.id,
@@ -163,10 +174,12 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
     }
 
     try {
+      const token = await getUserToken();
       const res = await fetch(`${API_BASE_URL}/api/favorites/toggle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           userEmail: session.user.email,
@@ -194,9 +207,13 @@ export default function RecipeDetailsPage({ params: paramsPromise }) {
     e.preventDefault();
     setReporting(true);
     try {
+      const token = await getUserToken();
       const res = await fetch(`${API_BASE_URL}/api/reports`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           recipeId,
           reporterEmail: session?.user?.email || "anonymous",

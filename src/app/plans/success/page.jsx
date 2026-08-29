@@ -4,6 +4,9 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FaCrown, FaCheckCircle, FaTriangleExclamation } from "react-icons/fa6";
 import Link from "next/link";
+import { getUserToken } from "@/lib/core/session";
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -24,12 +27,14 @@ function SuccessContent() {
 
     async function verifyPayment() {
       try {
+        const token = await getUserToken();
         const response = await fetch(
-          "http://localhost:5000/api/payments/verify-session",
+          `${BASE_URL}/payments/verify-session`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({ sessionId }),
           },
